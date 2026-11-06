@@ -40,8 +40,17 @@ function BrowserWindow() {
   const [site, setSite] = useState<Site | null>(null);  // data from the backend (address, title, HTML), or null
 
   const latest = useRef('');
+  const frameRef = useRef<HTMLIFrameElement>(null); // the iframe of the page being shown
 
   const address = nav.current?.address ?? '';
+
+ 
+  function currentWithScroll(): Entry | null {
+    if (!nav.current) return null;
+    const win = frameRef.current?.contentWindow;
+    if (status !== 'shown' || !win) return nav.current; // Loading / Nowhere: nothing to save
+    return { ...nav.current, scrollY: win.scrollY };
+  }
 
   // load() gets the new data ready: it fetches the page and puts it into site and status. Then the JSX uses that data to show it
   async function load(next: string) {
@@ -71,10 +80,11 @@ function BrowserWindow() {
     if (!user) return;
     const next = toAddress(input);
     if (!next) return;
+    const here = currentWithScroll();
 
     setNav({
-      back: nav.current ? [...nav.back, nav.current] : nav.back,
-      current: { address: next, scrollY: 0 },
+      back: here ? [...nav.back, here] : nav.back,
+      current: { address: next, scrollY: 0 }, // new pages start at the top
       forward: [], // a new page loses forward
     });
     load(next);
@@ -83,24 +93,26 @@ function BrowserWindow() {
 
   // takes you to the previous page
   function back() {
-    if (!nav.current || nav.back.length === 0) return;
+    const here = currentWithScroll();
+    if (!here || nav.back.length === 0) return;
     const previous = nav.back[nav.back.length - 1];
 
     setNav({
       back: nav.back.slice(0, -1),
       current: previous,
-      forward: [...nav.forward, nav.current],
+      forward: [...nav.forward, here],
     });
     load(previous.address);
     record(previous.address, 'back');
   }
 
   function forward() {
-    if (!nav.current || nav.forward.length === 0) return;
+    const here = currentWithScroll();
+    if (!here || nav.forward.length === 0) return;
     const next = nav.forward[nav.forward.length - 1];
 
     setNav({
-      back: [...nav.back, nav.current],
+      back: [...nav.back, here],
       current: next,
       forward: nav.forward.slice(0, -1),
     });
@@ -128,7 +140,12 @@ function BrowserWindow() {
         {status === 'start' && <StartPage />}
         {status === 'loading' && <p className="p-6 text-zinc-500">Loading {address}…</p>}
         {status === 'shown' && site && (
-          <SiteFrame html={site.html} onNavigate={(href) => go(href, 'link')} />
+          <SiteFrame
+            html={site.html}
+            initialScrollY={nav.current?.scrollY ?? 0}
+            frameRef={frameRef}
+            onNavigate={(href) => go(href, 'link')}
+          />
         )}
         {status === 'nowhere' && <NowherePage address={address} />}
         {status === 'error' && (
