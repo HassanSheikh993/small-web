@@ -12,12 +12,14 @@ import SiteFrame from './SiteFrame';
 import NowherePage from './NowherePage';
 import HistoryPage, { type HistorySnapshot } from './HistoryPage';
 import SearchPage, { type SearchSnapshot } from './SearchPage';
+import PublishPage, { type PublishDraft } from './PublishPage';
 
-type Status = 'start' | 'loading' | 'shown' | 'nowhere' | 'error' | 'history' | 'search';
+type Status = 'start' | 'loading' | 'shown' | 'nowhere' | 'error' | 'history' | 'search' | 'publish';
 
 // Internal screens
 const HISTORY = 'about:history';
 const SEARCH = 'about:search';
+const PUBLISH = 'about:publish';
 
 const isInternal = (address: string) => address.startsWith('about:');
 const isSearch = (address: string) => address === SEARCH || address.startsWith(`${SEARCH}?`);
@@ -31,6 +33,7 @@ type Entry = {
   scrollY: number;
   history?: HistorySnapshot; // only for about:history: the rows and scroll to restore
   search?: SearchSnapshot; // only for about:search: the results and scroll to restore
+  publish?: PublishDraft; // only for about:publish: what was typed in the form
 };
 
 type Nav = {
@@ -67,6 +70,10 @@ function BrowserWindow() {
   const saveSearch = useCallback((s: SearchSnapshot) => {
     searchSnap.current = s;
   }, []);
+  const publishSnap = useRef<PublishDraft | null>(null); // latest state of the publish form
+  const savePublish = useCallback((d: PublishDraft) => {
+    publishSnap.current = d;
+  }, []);
 
   const address = nav.current?.address ?? '';
 
@@ -75,6 +82,7 @@ function BrowserWindow() {
     if (!nav.current) return null;
     if (status === 'history') return { ...nav.current, history: historySnap.current ?? undefined };
     if (status === 'search') return { ...nav.current, search: searchSnap.current ?? undefined };
+    if (status === 'publish') return { ...nav.current, publish: publishSnap.current ?? undefined };
     const win = frameRef.current?.contentWindow;
     if (status !== 'shown' || !win) return nav.current; // Loading / Nowhere: nothing to save
     return { ...nav.current, scrollY: win.scrollY };
@@ -94,6 +102,10 @@ function BrowserWindow() {
       setStatus('search');
       return;
     }
+    if (next === PUBLISH) {
+      setStatus('publish');
+      return;
+    }
 
     setStatus('loading');
 
@@ -110,7 +122,7 @@ function BrowserWindow() {
 
 // saves a visit to history
   function record(next: string, how: VisitHow) {
-    if (!user || isInternal(next)) return; // history and search screens are not visits
+    if (!user || isInternal(next)) return; // history, search and publish screens are not visits
     recordVisit(user._id, next, how).catch(() => {});
   }
 
@@ -174,6 +186,7 @@ function BrowserWindow() {
           onForward={forward}
           onHistory={() => go(HISTORY, 'typed')}
           onSearch={() => go(SEARCH, 'typed')}
+          onPublish={() => go(PUBLISH, 'typed')}
         />
         <UserPicker />
       </header>
@@ -206,6 +219,14 @@ function BrowserWindow() {
             onChange={saveSearch}
             onSearch={(q) => go(searchAddress(q), 'typed')}
             onOpen={(a) => go(a, 'search')}
+          />
+        )}
+        {status === 'publish' && user && (
+          <PublishPage
+            saved={nav.current?.publish}
+            defaultAuthorId={user._id}
+            onChange={savePublish}
+            onPublished={(a) => go(a, 'typed')}
           />
         )}
         {status === 'error' && (

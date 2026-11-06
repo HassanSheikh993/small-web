@@ -12,6 +12,7 @@ type Props = {
   onForward: () => void;
   onHistory: () => void;
   onSearch: () => void;
+  onPublish: () => void;
 };
 
 export default function Toolbar({
@@ -24,6 +25,7 @@ export default function Toolbar({
   onForward,   // Called when you click →.
   onHistory,   // Called when you click History.
   onSearch,    // Called when you click Search.
+  onPublish,   // Called when you click Publish.
 }: Props) {
   const [address, setAddress] = useState(currentAddress);
 
@@ -75,6 +77,14 @@ export default function Toolbar({
         className="rounded px-2 py-1 text-sm hover:bg-zinc-200 disabled:opacity-40 disabled:hover:bg-transparent"
       >
         History
+      </button>
+      <button
+        type="button"
+        onClick={onPublish}
+        disabled={disabled}
+        className="rounded px-2 py-1 text-sm hover:bg-zinc-200 disabled:opacity-40 disabled:hover:bg-transparent"
+      >
+        Publish
       </button>
     </form>
   );
