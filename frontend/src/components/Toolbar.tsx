@@ -10,6 +10,7 @@ type Props = {
   onGo: (address: string) => void;
   onBack: () => void;
   onForward: () => void;
+  onHistory: () => void;
 };
 
 export default function Toolbar({
@@ -20,6 +21,7 @@ export default function Toolbar({
   onGo,         // Called when you press Enter in the address bar.
   onBack,      // Called when you click ←.
   onForward,   // Called when you click →.
+  onHistory,   // Called when you click History.
 }: Props) {
   const [address, setAddress] = useState(currentAddress);
 
@@ -56,6 +58,14 @@ export default function Toolbar({
         disabled={disabled}
         onChange={(e) => setAddress(e.target.value)}
       />
+      <button
+        type="button"
+        onClick={onHistory}
+        disabled={disabled}
+        className="rounded px-2 py-1 text-sm hover:bg-zinc-200 disabled:opacity-40 disabled:hover:bg-transparent"
+      >
+        History
+      </button>
     </form>
   );
 }
