@@ -11,15 +11,26 @@ import StartPage from './StartPage';
 import SiteFrame from './SiteFrame';
 import NowherePage from './NowherePage';
 import HistoryPage, { type HistorySnapshot } from './HistoryPage';
+import SearchPage, { type SearchSnapshot } from './SearchPage';
 
-type Status = 'start' | 'loading' | 'shown' | 'nowhere' | 'error' | 'history';
+type Status = 'start' | 'loading' | 'shown' | 'nowhere' | 'error' | 'history' | 'search';
 
+// Internal screens
 const HISTORY = 'about:history';
+const SEARCH = 'about:search';
+
+const isInternal = (address: string) => address.startsWith('about:');
+const isSearch = (address: string) => address === SEARCH || address.startsWith(`${SEARCH}?`);
+
+// "tide pool" -> "about:search?q=tide%20pool", and back again.
+const searchAddress = (query: string) => `${SEARCH}?q=${encodeURIComponent(query)}`;
+const queryOf = (address: string) => new URLSearchParams(address.split('?')[1] ?? '').get('q') ?? '';
 
 type Entry = {
   address: string;
   scrollY: number;
   history?: HistorySnapshot; // only for about:history: the rows and scroll to restore
+  search?: SearchSnapshot; // only for about:search: the results and scroll to restore
 };
 
 type Nav = {
@@ -52,6 +63,10 @@ function BrowserWindow() {
   const saveHistory = useCallback((s: HistorySnapshot) => {
     historySnap.current = s;
   }, []);
+  const searchSnap = useRef<SearchSnapshot | null>(null); // latest state of the search screen
+  const saveSearch = useCallback((s: SearchSnapshot) => {
+    searchSnap.current = s;
+  }, []);
 
   const address = nav.current?.address ?? '';
 
@@ -59,6 +74,7 @@ function BrowserWindow() {
   function currentWithScroll(): Entry | null {
     if (!nav.current) return null;
     if (status === 'history') return { ...nav.current, history: historySnap.current ?? undefined };
+    if (status === 'search') return { ...nav.current, search: searchSnap.current ?? undefined };
     const win = frameRef.current?.contentWindow;
     if (status !== 'shown' || !win) return nav.current; // Loading / Nowhere: nothing to save
     return { ...nav.current, scrollY: win.scrollY };
@@ -72,6 +88,10 @@ function BrowserWindow() {
     // The history screen is built in, not fetched from the backend.
     if (next === HISTORY) {
       setStatus('history');
+      return;
+    }
+    if (isSearch(next)) {
+      setStatus('search');
       return;
     }
 
@@ -90,7 +110,7 @@ function BrowserWindow() {
 
 // saves a visit to history
   function record(next: string, how: VisitHow) {
-    if (!user || next === HISTORY) return; // the history screen is not a visit
+    if (!user || isInternal(next)) return; // history and search screens are not visits
     recordVisit(user._id, next, how).catch(() => {});
   }
 
@@ -99,7 +119,7 @@ function BrowserWindow() {
     if (!user) return;
     const next = toAddress(input);
     if (!next) return;
-    if (next === HISTORY && address === HISTORY) return; // already on the history screen
+    if (isInternal(next) && next === address) return; // already on this history / search screen
     const here = currentWithScroll();
 
     setNav({
@@ -153,12 +173,13 @@ function BrowserWindow() {
           onBack={back}
           onForward={forward}
           onHistory={() => go(HISTORY, 'typed')}
+          onSearch={() => go(SEARCH, 'typed')}
         />
         <UserPicker />
       </header>
 
       <main className="flex-1 overflow-auto bg-white">
-        {status === 'start' && <StartPage />}
+        {status === 'start' && <StartPage onSearch={(q) => go(searchAddress(q), 'typed')} />}
         {status === 'loading' && <p className="p-6 text-zinc-500">Loading {address}…</p>}
         {status === 'shown' && site && (
           <SiteFrame
@@ -175,6 +196,16 @@ function BrowserWindow() {
             saved={nav.current?.history}
             onChange={saveHistory}
             onOpen={(a) => go(a, 'history')}
+          />
+        )}
+        {status === 'search' && (
+          <SearchPage
+            key={address} // a new search = a fresh screen
+            query={queryOf(address)}
+            saved={nav.current?.search}
+            onChange={saveSearch}
+            onSearch={(q) => go(searchAddress(q), 'typed')}
+            onOpen={(a) => go(a, 'search')}
           />
         )}
         {status === 'error' && (

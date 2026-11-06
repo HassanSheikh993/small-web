@@ -11,6 +11,7 @@ type Props = {
   onBack: () => void;
   onForward: () => void;
   onHistory: () => void;
+  onSearch: () => void;
 };
 
 export default function Toolbar({
@@ -22,6 +23,7 @@ export default function Toolbar({
   onBack,      // Called when you click ←.
   onForward,   // Called when you click →.
   onHistory,   // Called when you click History.
+  onSearch,    // Called when you click Search.
 }: Props) {
   const [address, setAddress] = useState(currentAddress);
 
@@ -58,6 +60,14 @@ export default function Toolbar({
         disabled={disabled}
         onChange={(e) => setAddress(e.target.value)}
       />
+      <button
+        type="button"
+        onClick={onSearch}
+        disabled={disabled}
+        className="rounded px-2 py-1 text-sm hover:bg-zinc-200 disabled:opacity-40 disabled:hover:bg-transparent"
+      >
+        Search
+      </button>
       <button
         type="button"
         onClick={onHistory}
