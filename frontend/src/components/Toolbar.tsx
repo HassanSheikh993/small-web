@@ -2,11 +2,22 @@
 
 import { useState } from 'react';
 
-export default function Toolbar() {
-  const [address, setAddress] = useState('');
+type Props = {
+  currentAddress: string;
+  onGo: (address: string) => void;
+};
+
+export default function Toolbar({ currentAddress, onGo }: Props) {
+  const [address, setAddress] = useState(currentAddress);
 
   return (
-    <form className="flex flex-1 items-center gap-2" onSubmit={(e) => e.preventDefault()}>
+    <form
+      className="flex flex-1 items-center gap-2"
+      onSubmit={(e) => {
+        e.preventDefault();
+        onGo(address);
+      }}
+    >
       <button type="button" disabled className="rounded px-2 py-1 disabled:opacity-40" aria-label="Back">
         ←
       </button>
