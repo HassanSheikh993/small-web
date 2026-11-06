@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { getSite, recordVisit } from '@/lib/api';
 import { toAddress } from '@/lib/address';
 import type { Site, VisitHow } from '@/lib/types';
@@ -10,10 +10,17 @@ import UserPicker from './UserPicker';
 import StartPage from './StartPage';
 import SiteFrame from './SiteFrame';
 import NowherePage from './NowherePage';
+import HistoryPage, { type HistorySnapshot } from './HistoryPage';
 
-type Status = 'start' | 'loading' | 'shown' | 'nowhere' | 'error';
+type Status = 'start' | 'loading' | 'shown' | 'nowhere' | 'error' | 'history';
 
-type Entry = { address: string; scrollY: number };
+const HISTORY = 'about:history';
+
+type Entry = {
+  address: string;
+  scrollY: number;
+  history?: HistorySnapshot; // only for about:history: the rows and scroll to restore
+};
 
 type Nav = {
   back: Entry[]; // pages we came from (last item = previous page)
@@ -41,12 +48,17 @@ function BrowserWindow() {
 
   const latest = useRef('');
   const frameRef = useRef<HTMLIFrameElement>(null); // the iframe of the page being shown
+  const historySnap = useRef<HistorySnapshot | null>(null); // latest state of the history screen
+  const saveHistory = useCallback((s: HistorySnapshot) => {
+    historySnap.current = s;
+  }, []);
 
   const address = nav.current?.address ?? '';
 
- 
+
   function currentWithScroll(): Entry | null {
     if (!nav.current) return null;
+    if (status === 'history') return { ...nav.current, history: historySnap.current ?? undefined };
     const win = frameRef.current?.contentWindow;
     if (status !== 'shown' || !win) return nav.current; // Loading / Nowhere: nothing to save
     return { ...nav.current, scrollY: win.scrollY };
@@ -56,6 +68,13 @@ function BrowserWindow() {
   async function load(next: string) {
     latest.current = next;
     setSite(null);
+
+    // The history screen is built in, not fetched from the backend.
+    if (next === HISTORY) {
+      setStatus('history');
+      return;
+    }
+
     setStatus('loading');
 
     try {
@@ -71,7 +90,7 @@ function BrowserWindow() {
 
 // saves a visit to history
   function record(next: string, how: VisitHow) {
-    if (!user) return;
+    if (!user || next === HISTORY) return; // the history screen is not a visit
     recordVisit(user._id, next, how).catch(() => {});
   }
 
@@ -80,6 +99,7 @@ function BrowserWindow() {
     if (!user) return;
     const next = toAddress(input);
     if (!next) return;
+    if (next === HISTORY && address === HISTORY) return; // already on the history screen
     const here = currentWithScroll();
 
     setNav({
@@ -132,6 +152,7 @@ function BrowserWindow() {
           onGo={(input) => go(input, 'typed')}
           onBack={back}
           onForward={forward}
+          onHistory={() => go(HISTORY, 'typed')}
         />
         <UserPicker />
       </header>
@@ -148,6 +169,14 @@ function BrowserWindow() {
           />
         )}
         {status === 'nowhere' && <NowherePage address={address} />}
+        {status === 'history' && user && (
+          <HistoryPage
+            userId={user._id}
+            saved={nav.current?.history}
+            onChange={saveHistory}
+            onOpen={(a) => go(a, 'history')}
+          />
+        )}
         {status === 'error' && (
           <p className="p-6 text-red-600">Could not load {address}. Is the backend running?</p>
         )}
