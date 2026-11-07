@@ -31,7 +31,7 @@ export default function Toolbar({
 
   return (
     <form
-      className="flex flex-1 items-center gap-2"
+      className="flex flex-1 items-center gap-1.5"
       onSubmit={(e) => {
         e.preventDefault();
         onGo(address);
@@ -41,7 +41,7 @@ export default function Toolbar({
         type="button"
         onClick={onBack}
         disabled={!canBack}
-        className="rounded px-2 py-1 hover:bg-zinc-200 disabled:opacity-40 disabled:hover:bg-transparent"
+        className="btn btn-ghost text-lg"
         aria-label="Back"
       >
         ←
@@ -50,13 +50,13 @@ export default function Toolbar({
         type="button"
         onClick={onForward}
         disabled={!canForward}
-        className="rounded px-2 py-1 hover:bg-zinc-200 disabled:opacity-40 disabled:hover:bg-transparent"
+        className="btn btn-ghost text-lg"
         aria-label="Forward"
       >
         →
       </button>
       <input
-        className="flex-1 rounded border border-zinc-300 bg-white px-3 py-1 font-mono text-sm disabled:bg-zinc-100"
+        className="input mx-1 flex-1 rounded-full py-1.5 font-mono text-sm"
         placeholder={disabled ? 'Pick a name first' : 'Type an address, e.g. tidepool.zz'}
         value={address}
         disabled={disabled}
@@ -66,7 +66,7 @@ export default function Toolbar({
         type="button"
         onClick={onSearch}
         disabled={disabled}
-        className="rounded px-2 py-1 text-sm hover:bg-zinc-200 disabled:opacity-40 disabled:hover:bg-transparent"
+        className="btn btn-ghost"
       >
         Search
       </button>
@@ -74,7 +74,7 @@ export default function Toolbar({
         type="button"
         onClick={onHistory}
         disabled={disabled}
-        className="rounded px-2 py-1 text-sm hover:bg-zinc-200 disabled:opacity-40 disabled:hover:bg-transparent"
+        className="btn btn-ghost"
       >
         History
       </button>
@@ -82,7 +82,7 @@ export default function Toolbar({
         type="button"
         onClick={onPublish}
         disabled={disabled}
-        className="rounded px-2 py-1 text-sm hover:bg-zinc-200 disabled:opacity-40 disabled:hover:bg-transparent"
+        className="btn btn-primary px-3 py-1.5"
       >
         Publish
       </button>

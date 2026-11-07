@@ -1,19 +1,102 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ---------------------------------------------------------------
+   Colour scheme. Change a colour here and it changes everywhere.
+   Each one can be used in Tailwind, e.g. "text-ink", "bg-brand",
+   "border-line".
+   --------------------------------------------------------------- */
+@theme {
+  --color-ink: #16212c;        /* main text */
+  --color-muted: #41505e;      /* secondary text */
+  --color-faint: #7a8894;      /* hints, labels */
+  --color-line: #d3dbd8;       /* borders */
+  --color-paper: #f1f4f3;      /* app background */
+  --color-card: #fbfcfc;       /* cards, header */
+  --color-brand: #2e7bd6;      /* links, main buttons */
+  --color-brand-dark: #1f5fae; /* main button on hover */
+  --color-brand-soft: #e7f0fb; /* light blue backgrounds */
+  --color-ok: #2f9160;         /* green */
+  --color-warn: #e08a34;       /* orange */
+  --color-bad: #c4453d;        /* red, errors */
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* ---------------------------------------------------------------
+   A few reusable styles, written in plain CSS.
+   Use them like: className="btn btn-primary"
+   --------------------------------------------------------------- */
+@layer components {
+  /* Card: a white box with a border and rounded corners */
+  .card {
+    background: var(--color-card);
+    border: 1px solid var(--color-line);
+    border-radius: 14px;
+  }
+
+  /* Text box, dropdown and big text area */
+  .input {
+    width: 100%;
+    background: white;
+    border: 1px solid var(--color-line);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: var(--color-ink);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .input:focus {
+    border-color: var(--color-brand);
+    box-shadow: 0 0 0 3px var(--color-brand-soft);
+  }
+  .input:disabled {
+    background: var(--color-paper);
+    cursor: not-allowed;
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, opacity 0.15s;
+  }
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* Main action: blue */
+  .btn-primary {
+    background: var(--color-brand);
+    color: white;
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--color-brand-dark);
+  }
+
+  /* Quiet button for the toolbar: no background until hovered */
+  .btn-ghost {
+    padding: 6px 10px;
+    color: var(--color-muted);
+  }
+  .btn-ghost:hover:not(:disabled) {
+    background: var(--color-paper);
+    color: var(--color-ink);
+  }
 }

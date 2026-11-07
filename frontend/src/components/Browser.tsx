@@ -174,7 +174,10 @@ function BrowserWindow() {
 
   return (
     <div className="flex h-screen flex-col">
-      <header className="flex items-center gap-4 border-b border-zinc-200 bg-zinc-100 px-4 py-2">
+      <header className="flex items-center gap-4 border-b border-line bg-card px-4 py-2.5 shadow-sm">
+        <span className="hidden font-semibold tracking-tight text-ink sm:block">
+          <span className="text-brand">●</span> Small Web
+        </span>
         <Toolbar
           key={address}
           currentAddress={address}
@@ -191,9 +194,13 @@ function BrowserWindow() {
         <UserPicker />
       </header>
 
-      <main className="flex-1 overflow-auto bg-white">
+      <main className="flex-1 overflow-auto bg-paper">
         {status === 'start' && <StartPage onSearch={(q) => go(searchAddress(q), 'typed')} />}
-        {status === 'loading' && <p className="p-6 text-zinc-500">Loading {address}…</p>}
+        {status === 'loading' && (
+          <p className="p-10 text-center text-faint">
+            Loading <span className="font-mono text-muted">{address}</span>…
+          </p>
+        )}
         {status === 'shown' && site && (
           <SiteFrame
             html={site.html}
@@ -230,7 +237,9 @@ function BrowserWindow() {
           />
         )}
         {status === 'error' && (
-          <p className="p-6 text-red-600">Could not load {address}. Is the backend running?</p>
+          <p className="p-10 text-center text-bad">
+            Could not load <span className="font-mono">{address}</span>. Is the backend running?
+          </p>
         )}
       </main>
     </div>

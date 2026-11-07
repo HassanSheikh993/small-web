@@ -48,34 +48,43 @@ export default function SearchPage({ query, saved, onChange, onSearch, onOpen }:
     <div ref={boxRef} onScroll={handleScroll} className="h-full overflow-auto">
       <div className="mx-auto max-w-2xl px-6 py-8">
         <form
-          className="mb-6 flex gap-2"
+          className="card mb-6 flex gap-2 p-2 shadow-sm"
           onSubmit={(e) => {
             e.preventDefault();
             if (text.trim()) onSearch(text.trim());
           }}
         >
           <input
-            className="flex-1 rounded border border-zinc-300 px-3 py-2"
+            className="input flex-1 border-transparent"
             placeholder="Search the small web"
             value={text}
             onChange={(e) => setText(e.target.value)}
           />
-          <button type="submit" className="rounded bg-zinc-800 px-4 py-2 text-white hover:bg-zinc-700">
+          <button type="submit" className="btn btn-primary">
             Search
           </button>
         </form>
 
-        {query && results === null && !error && <p className="text-zinc-500">Searching…</p>}
-        {error && <p className="text-red-600">Could not search. Is the backend running?</p>}
-        {results && results.length === 0 && <p className="text-zinc-500">No pages match “{query}”.</p>}
+        {query && results === null && !error && <p className="text-faint">Searching…</p>}
+        {error && <p className="text-bad">Could not search. Is the backend running?</p>}
+        {results && results.length === 0 && <p className="text-faint">No pages match “{query}”.</p>}
+        {results && results.length > 0 && (
+          <p className="mb-3 text-sm text-faint">
+            {results.length} {results.length === 1 ? 'page' : 'pages'} match “{query}”
+          </p>
+        )}
 
-        <ul className="space-y-5">
+        <ul className="space-y-3">
           {results?.map((r) => (
             <li key={r.address}>
-              <button type="button" onClick={() => onOpen(r.address)} className="text-left">
-                <span className="block text-lg text-blue-700 hover:underline">{r.title}</span>
-                <span className="block font-mono text-xs text-green-700">{r.address}</span>
-                <span className="block text-sm text-zinc-600">{r.snippet}</span>
+              <button
+                type="button"
+                onClick={() => onOpen(r.address)}
+                className="card block w-full p-4 text-left transition-colors hover:border-brand"
+              >
+                <span className="block text-lg font-medium text-brand">{r.title}</span>
+                <span className="mb-1 block font-mono text-xs text-ok">{r.address}</span>
+                <span className="block text-sm text-muted">{r.snippet}</span>
               </button>
             </li>
           ))}

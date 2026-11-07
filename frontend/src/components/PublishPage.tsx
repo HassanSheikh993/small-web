@@ -47,15 +47,19 @@ export default function PublishPage({ saved, defaultAuthorId, onChange, onPublis
     }
   }
 
-  const input = 'w-full rounded border border-zinc-300 px-3 py-2';
+  const input = 'input';
+  const label = 'mb-1 block text-sm font-medium text-muted';
 
   return (
     <div className="h-full overflow-auto">
-      <form onSubmit={handleSubmit} className="mx-auto max-w-2xl space-y-4 px-6 py-8">
-        <h1 className="text-2xl font-semibold">Publish a site</h1>
+      <form onSubmit={handleSubmit} className="card mx-auto my-8 max-w-2xl space-y-5 p-6 shadow-sm">
+        <div>
+          <h1 className="text-2xl font-semibold">Publish a site</h1>
+          <p className="text-sm text-faint">Give it an address and a page of HTML.</p>
+        </div>
 
         <label className="block">
-          <span className="mb-1 block text-sm text-zinc-600">Address</span>
+          <span className={label}>Address</span>
           <input
             className={`${input} font-mono`}
             placeholder="mypage.zz"
@@ -66,12 +70,12 @@ export default function PublishPage({ saved, defaultAuthorId, onChange, onPublis
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-sm text-zinc-600">Title</span>
+          <span className={label}>Title</span>
           <input className={input} value={title} onChange={(e) => setTitle(e.target.value)} required />
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-sm text-zinc-600">HTML</span>
+          <span className={label}>HTML</span>
           <textarea
             className={`${input} h-64 font-mono text-sm`}
             placeholder={'<h1>Hello</h1>\n<p>My page. Link to <a href="tidepool.zz">tidepool</a>.</p>'}
@@ -79,14 +83,14 @@ export default function PublishPage({ saved, defaultAuthorId, onChange, onPublis
             onChange={(e) => setHtml(e.target.value)}
             required
           />
-          <span className="mt-1 block text-xs text-zinc-500">
+          <span className="mt-2 block rounded-lg bg-brand-soft px-3 py-2 text-xs text-muted">
             HTML and inline CSS only. No scripts, forms or outside images. Link to other sites by
             address, e.g. href=&quot;tidepool.zz&quot;.
           </span>
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-sm text-zinc-600">Author</span>
+          <span className={label}>Author</span>
           <select className={input} value={authorId} onChange={(e) => setAuthorId(e.target.value)}>
             {users.map((u) => (
               <option key={u._id} value={u._id}>
@@ -96,13 +100,11 @@ export default function PublishPage({ saved, defaultAuthorId, onChange, onPublis
           </select>
         </label>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && (
+          <p className="rounded-lg border border-bad/30 bg-bad/10 px-3 py-2 text-sm text-bad">{error}</p>
+        )}
 
-        <button
-          type="submit"
-          disabled={sending}
-          className="rounded bg-zinc-800 px-4 py-2 text-white hover:bg-zinc-700 disabled:opacity-50"
-        >
+        <button type="submit" disabled={sending} className="btn btn-primary">
           {sending ? 'Publishing…' : 'Publish'}
         </button>
       </form>
