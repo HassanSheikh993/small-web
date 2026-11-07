@@ -8,9 +8,12 @@ export default function StartPage({ onSearch }: { onSearch: (query: string) => v
   const [text, setText] = useState('');
 
   return (
-    <div className="mx-auto max-w-xl px-6 py-16 text-center">
-      <h1 className="mb-3 text-3xl font-semibold">The Small Web</h1>
-      <p className="mb-6 text-zinc-600">
+    <div className="mx-auto max-w-xl px-6 py-20 text-center">
+      <p className="mb-3 font-mono text-xs uppercase tracking-[0.2em] text-faint">A tiny web of its own</p>
+      <h1 className="mb-3 text-4xl font-bold tracking-tight">
+        The <span className="text-brand">Small</span> Web
+      </h1>
+      <p className="mb-8 text-muted">
         {user
           ? `Hello ${user.name}. Type an address above, or search below.`
           : 'Pick a name to start browsing.'}
@@ -18,19 +21,19 @@ export default function StartPage({ onSearch }: { onSearch: (query: string) => v
 
       {user && (
         <form
-          className="flex gap-2"
+          className="card flex gap-2 p-2 shadow-sm"
           onSubmit={(e) => {
             e.preventDefault();
             if (text.trim()) onSearch(text.trim());
           }}
         >
           <input
-            className="flex-1 rounded border border-zinc-300 px-3 py-2"
+            className="input flex-1 border-transparent"
             placeholder="Search the small web"
             value={text}
             onChange={(e) => setText(e.target.value)}
           />
-          <button type="submit" className="rounded bg-zinc-800 px-4 py-2 text-white hover:bg-zinc-700">
+          <button type="submit" className="btn btn-primary">
             Search
           </button>
         </form>

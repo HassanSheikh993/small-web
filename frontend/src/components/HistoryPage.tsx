@@ -4,6 +4,16 @@ import { useEffect, useRef, useState } from 'react';
 import { getHistory } from '@/lib/api';
 import type { Visit } from '@/lib/types';
 
+// A colour for each way of arriving, shown as a small badge.
+const HOW_COLOR: Record<string, string> = {
+  typed: 'bg-brand-soft text-brand',
+  link: 'bg-ok/10 text-ok',
+  search: 'bg-warn/10 text-warn',
+  history: 'bg-paper text-muted',
+  back: 'bg-paper text-faint',
+  forward: 'bg-paper text-faint',
+};
+
 export type HistorySnapshot = {
   visits: Visit[];
   hasMore: boolean;
@@ -70,19 +80,21 @@ export default function HistoryPage({ userId, saved, onChange, onOpen }: Props) 
       <div className="mx-auto max-w-2xl px-6 py-8">
         <h1 className="mb-4 text-2xl font-semibold">History</h1>
 
-        {visits.length === 0 && !hasMore && <p className="text-zinc-500">No visits yet.</p>}
+        {visits.length === 0 && !hasMore && <p className="text-faint">No visits yet.</p>}
 
-        <ul className="divide-y divide-zinc-200">
+        <ul className="card divide-y divide-line overflow-hidden">
           {visits.map((v) => (
             <li key={v._id}>
               <button
                 type="button"
                 onClick={() => onOpen(v.address)}
-                className="flex w-full items-center gap-4 px-2 py-2 text-left hover:bg-zinc-100"
+                className="flex w-full items-center gap-4 px-4 py-2.5 text-left transition-colors hover:bg-brand-soft"
               >
-                <span className="flex-1 font-mono text-sm">{v.address}</span>
-                <span className="w-16 text-xs text-zinc-500">{v.how}</span>
-                <span className="text-xs text-zinc-500">
+                <span className="flex-1 font-mono text-sm text-ink">{v.address}</span>
+                <span className={`w-16 rounded-full px-2 py-0.5 text-center text-xs ${HOW_COLOR[v.how]}`}>
+                  {v.how}
+                </span>
+                <span className="w-36 text-right text-xs text-faint">
                   {new Date(v.visitedAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
                 </span>
               </button>
@@ -90,11 +102,11 @@ export default function HistoryPage({ userId, saved, onChange, onOpen }: Props) 
           ))}
         </ul>
 
-        {hasMore && !error && <p className="py-4 text-center text-sm text-zinc-500">Loading…</p>}
+        {hasMore && !error && <p className="py-4 text-center text-sm text-faint">Loading…</p>}
         {!hasMore && visits.length > 0 && (
-          <p className="py-4 text-center text-sm text-zinc-400">End of history</p>
+          <p className="py-4 text-center text-sm text-faint">End of history</p>
         )}
-        {error && <p className="py-4 text-center text-sm text-red-600">Could not load history.</p>}
+        {error && <p className="py-4 text-center text-sm text-bad">Could not load history.</p>}
       </div>
     </div>
   );

@@ -42,7 +42,7 @@ export default function SiteFrame({ html, initialScrollY, frameRef, onNavigate }
       sandbox="allow-same-origin"
       srcDoc={`<meta http-equiv="Content-Security-Policy" content="${CSP}">${html}`}
       onLoad={handleLoad}
-      className="block h-full w-full border-0"
+      className="block h-full w-full border-0 bg-white"
     />
   );
 }
